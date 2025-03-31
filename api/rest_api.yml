@@ -1,0 +1,96 @@
+openapi: 3.0.4
+info:
+  title: Social Network API
+  description: Social network api example
+  version: 1.0.0
+servers:
+  - url: https://social-network.com/api/яv1
+    description: main server
+
+paths:
+  # Добавить новую статью
+  /user/add:
+    post:
+      summary: Создать статью
+      requestBody:
+        required: true
+        content:
+          application/json:
+              schema:
+                type: object
+                properties:
+                  id: 
+                    type: string
+                    format: uuid
+      responses:
+        '201':
+          description: Пользователь успешно добавлен
+
+
+  # Получить одну статью по ID
+  /articles/{id}:
+    get:
+      summary: Получить статью по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+        '404':
+          description: Статья не найдена
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: uuid
+          example: 846df173-3505-4f9c-81aa-2111e477d02b
+        userInfo: 
+          $ref: '#components/schemas/UserCommonInfo'
+        phone: 
+          type: string
+          pattern: '^\+?[0-9\s\-\(\)]{7,20}$'  # международный формат
+          example: "+79161234567"
+        birthDate:
+          type: string
+          format: date
+        friendList:
+          type: array
+          items: 
+            $ref: '#components/schemas/UserCommonInfo'
+      required:
+        - id
+        - birthDate
+
+    UserCommonInfo:
+      type: object
+      properties:
+        userRef:
+          type: string
+          format: uuid
+          example: 846df173-3505-4f9c-81aa-2111e477d64b
+        firstName:
+          type: string
+        secondName:
+          type: string
+        city:
+          type: string
+        age:
+          type: integer
+          minumum: 0
+          maximum: 150
+          
+          example: true
+      required:
+        - title
+        - content
