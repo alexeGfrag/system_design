@@ -4,14 +4,39 @@ info:
   description: Social network api example
   version: 1.0.0
 servers:
-  - url: https://social-network.com/api/яv1
+  - url: https://social-network.com/api/v1
     description: main server
 
 paths:
-  # Добавить новую статью
+  # Опубликовать пост в ленту
+  /post-on:
+    post:
+      summary: Опубликовать пост в ленту
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: "Максимум 10 изображений формата JPEG"
+                message:
+                  type: string
+                  maxLength: 2048
+                  
+      responses:
+        '201':
+          description: Заявка успешно отправлена
+          
+  # Отправить пользователю заявку в друзья
   /user/add:
     post:
-      summary: Создать статью
+      summary: Отправить заявку в друзья
       requestBody:
         required: true
         content:
@@ -22,30 +47,76 @@ paths:
                   id: 
                     type: string
                     format: uuid
+                    example: 846df173-3505-4f9c-81aa-2111e477d02b
+                  welcomeMessage:
+                    type: string
+                    maxLength: 128
       responses:
         '201':
-          description: Пользователь успешно добавлен
-
-
-  # Получить одну статью по ID
-  /articles/{id}:
-    get:
-      summary: Получить статью по ID
+          description: Заявка успешно отправлена
+          
+  # Удалить пользователя из друзей
+  /user/delete{id}:
+    delete:
+      summary: Удалить пользователя из друзей
       parameters:
         - name: id
           in: path
           required: true
           schema:
-            type: integer
+            type: string
+            format: uuid
+            example: 846df173-3505-4f9c-81aa-2111e477d02b
+      responses:
+        '201':
+          description: Пользователь успешно удален из друзей
+
+
+  # Получить данные об анкете пользователя
+  /user/{id}:
+    get:
+      summary: Получить данные об анкете пользователя
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 846df173-3505-4f9c-81aa-2111e477d02b
       responses:
         '200':
           description: Успешный запрос
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Article'
+                $ref: '#/components/schemas/User'
         '404':
-          description: Статья не найдена
+          description: Пользователь не найден
+          
+  # Получить данные о друзьях пользователя
+  /user-friends/{id}:
+    get:
+      summary: Получить данные о друзьях пользователя
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 846df173-3505-4f9c-81aa-2111e477d02b
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserCommonInfo'
+        '404':
+          description: Пользователь не найден
 
 components:
   schemas:
@@ -53,10 +124,11 @@ components:
       type: object
       properties:
         id:
-          type: uuid
+          type: string
+          format: uuid
           example: 846df173-3505-4f9c-81aa-2111e477d02b
         userInfo: 
-          $ref: '#components/schemas/UserCommonInfo'
+          $ref: '#/components/schemas/UserCommonInfo'
         phone: 
           type: string
           pattern: '^\+?[0-9\s\-\(\)]{7,20}$'  # международный формат
@@ -67,7 +139,7 @@ components:
         friendList:
           type: array
           items: 
-            $ref: '#components/schemas/UserCommonInfo'
+            $ref: '#/components/schemas/UserCommonInfo'
       required:
         - id
         - birthDate
@@ -81,16 +153,20 @@ components:
           example: 846df173-3505-4f9c-81aa-2111e477d64b
         firstName:
           type: string
+          example: Алексей
         secondName:
           type: string
+          example: Парамонов
         city:
           type: string
+          example: Москва
         age:
           type: integer
-          minumum: 0
-          maximum: 150
-          
-          example: true
+          format: int32
+          minimum: 0
+          maximum: 120
+          example: 25
+        
       required:
         - title
         - content
