@@ -8,33 +8,38 @@ servers:
     description: main server
 
 paths:
-  # Опубликовать пост в ленту
-  /post-on:
+  # Опубликовать пост без медиа ленту
+  /postOn:
     post:
-      summary: Опубликовать пост в ленту
+      summary: Опубликовать пост без медиа файлов 
       requestBody:
         required: true
         content:
           multipart/form-data:
             schema:
-              type: object
-              properties:
-                images:
-                  type: array
-                  items:
-                    type: string
-                    format: binary
-                  description: "Максимум 10 изображений формата JPEG"
-                message:
-                  type: string
-                  maxLength: 2048
-                  
+              $ref: '#/components/schemas/UserPost'
       responses:
         '201':
-          description: Заявка успешно отправлена
+          description: Пост без медиа успешно опубликован
+          
+  # Опубликовать пост с медиа файлами в ленту
+  /postOnMedia:
+    post:
+      summary: Опубликовать пост с медиа файлами
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserMediaPost'
+      responses:
+        '201':
+          description: Пост с медиа успешно опубликован
+        '400':
+          description: "Неверный формат файла или отсутствует файл"
           
   # Отправить пользователю заявку в друзья
-  /user/add:
+  /friends/invite:
     post:
       summary: Отправить заявку в друзья
       requestBody:
@@ -56,7 +61,7 @@ paths:
           description: Заявка успешно отправлена
           
   # Удалить пользователя из друзей
-  /user/delete{id}:
+  /friends/delete{id}:
     delete:
       summary: Удалить пользователя из друзей
       parameters:
@@ -73,7 +78,7 @@ paths:
 
 
   # Получить данные об анкете пользователя
-  /user/{id}:
+  /friends/getUserProfile{id}:
     get:
       summary: Получить данные об анкете пользователя
       parameters:
@@ -95,7 +100,7 @@ paths:
           description: Пользователь не найден
           
   # Получить данные о друзьях пользователя
-  /user-friends/{id}:
+  /friends/getUserFriends{id}:
     get:
       summary: Получить данные о друзьях пользователя
       parameters:
@@ -166,7 +171,37 @@ components:
           minimum: 0
           maximum: 120
           example: 25
-        
-      required:
-        - title
-        - content
+    
+    UserMediaPost:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+          description: "Медиафайл (jpg, png, mp4, etc.)"
+        caption:
+          type: string
+          description: "Описание к медиа"
+        simplePost:
+          $ref: '#/components/schemas/UserPost'
+        userId:
+            type: string
+            format: uuid
+            description: "ID пользователя"
+            
+    UserPost:
+      type: object
+      properties:
+        message:
+          type: string
+          description: "Текст поста"
+        userId:
+            type: string
+            format: uuid
+            description: "ID пользователя"
+
+
+
+
+
+
